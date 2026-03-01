@@ -1,0 +1,18 @@
+# Environments
+.env
+
+# Defaults
+.DS_Store
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# VS Code
+.vscode/
+
+# Virtual environments
+venv/
+env/
+.venv/
