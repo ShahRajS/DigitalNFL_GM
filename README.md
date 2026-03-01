@@ -56,14 +56,6 @@ This file will be updated weekly. Copy the template below into your root project
 GOOGLE_CLOUD_PROJECT="your-project-id"
 # The region for your Vertex AI resources (e.g., us-central1)
 GOOGLE_CLOUD_LOCATION="us-central1"
-
-# === WEEK 2: Tools (Coming Soon) ===
-# API Key for NFL Data (e.g., SportsDataIO or RapidAPI)
-# NFL_API_KEY="your-api-key-here"
-
-# === WEEK 6: MCP (Coming Soon) ===
-# Path to your local SQLite database for historical scouting
-# SQLITE_DB_PATH="./data/nfl_history.db"
 ```
 
 ---
