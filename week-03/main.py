@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from google.adk.agents import Agent
 from google.adk.models.google_llm import Gemini
 from google.adk.runners import InMemoryRunner
-from google.genai import types
+from google.genai import types, Client
 
 # 1. Load your .env from the root directory
 load_dotenv()
@@ -16,10 +16,11 @@ import nflreadpy as nfl
 import json
 import ssl
 
-def get_player_stats(player_name: str, year: int = 2025) -> str:
+def get_player_stats(query: str, player_name: str, year: int = 2025) -> str:
     """Gets the stats for a given NFL player using nflreadpy.
 
     Args:
+        query: The original question the user asked.
         player_name: The first and last name of the NFL player (e.g., 'Christian McCaffrey').
         year: The NFL season year to retrieve stats for (defaults to 2025).
         
@@ -49,15 +50,30 @@ def get_player_stats(player_name: str, year: int = 2025) -> str:
             "stats": stats.to_dicts()[0]
         }
         
-        return json.dumps(result)
+        # === NEW: Use an LLM to process the raw data and answer the query ===
+        client = Client()
+        prompt = f"""
+        You are a seasoned NFL scout. You have been given raw JSON statistics for a player.
+        Answer the following user query based ONLY on the provided data.
+        
+        User Query: {query}
+        
+        Raw Data: {json.dumps(result)}
+        """
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+        )
+        return response.text
         
     except Exception as e:
         return f"Error retrieving data for {player_name} in the year {year} using nflreadpy: {e}"
 
-def get_upcoming_schedule(team_abbr: str, year: int = 2025) -> str:
+def get_upcoming_schedule(query: str, team_abbr: str, year: int = 2025) -> str:
     """Gets the schedule for a given NFL team using nflreadpy.
 
     Args:
+        query: The original question the user asked.
         team_abbr: The 2-3 letter abbreviation of the NFL team (e.g., 'SF', 'KC').
         year: The NFL season year (defaults to 2025).
         
@@ -84,15 +100,30 @@ def get_upcoming_schedule(team_abbr: str, year: int = 2025) -> str:
             "schedule": schedule.to_dicts()
         }
         
-        return json.dumps(result)
+        # === NEW: Use an LLM to process the raw data and answer the query ===
+        client = Client()
+        prompt = f"""
+        You are an NFL scheduling expert. You have been given raw JSON schedule data for a team.
+        Answer the following user query based ONLY on the provided data.
+        
+        User Query: {query}
+        
+        Raw Data: {json.dumps(result)}
+        """
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+        )
+        return response.text
         
     except Exception as e:
         return f"Error retrieving schedule for {team_abbr} in {year}: {e}"
 
-def get_depth_chart(team_abbr: str, position: str, year: int = 2025) -> str:
+def get_depth_chart(query: str, team_abbr: str, position: str, year: int = 2025) -> str:
     """Gets the depth chart for a specific position on a specific NFL team using nflreadpy.
 
     Args:
+        query: The original question the user asked.
         team_abbr: The abbreviation of the NFL team (e.g., 'SF', 'KC').
         position: The position to check (e.g., 'QB', 'RB', 'WR', 'TE').
         year: The NFL season year (defaults to 2025).
@@ -126,7 +157,21 @@ def get_depth_chart(team_abbr: str, position: str, year: int = 2025) -> str:
             "depth_chart": dc.to_dicts()
         }
         
-        return json.dumps(result)
+        # === NEW: Use an LLM to process the raw data and answer the query ===
+        client = Client()
+        prompt = f"""
+        You are a professional NFL personnel scout. You have been given raw JSON depth chart data for a team positional group.
+        Answer the following user query based ONLY on the provided data. Give concise answers.
+        
+        User Query: {query}
+        
+        Raw Data: {json.dumps(result)}
+        """
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+        )
+        return response.text
         
     except Exception as e:
         return f"Error retrieving depth chart for {team_abbr} {position} in {year}: {e}"
