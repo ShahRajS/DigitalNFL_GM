@@ -1,4 +1,5 @@
 google-adk
 python-dotenv
 google-genai
-nfl_data_py
+nflreadpy
+polars

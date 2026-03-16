@@ -12,12 +12,12 @@ load_dotenv()
 # WEEK 2 NEW FEATURE: TOOLS (GIVING YOUR GM "HANDS")
 # ======================================================================
 
-import nfl_data_py as nfl
+import nflreadpy as nfl
 import json
 import ssl
 
 def get_player_stats(player_name: str, year: int = 2023) -> str:
-    """Gets the stats for a given NFL player using nfl_data_py.
+    """Gets the stats for a given NFL player using nflreadpy.
 
     Args:
         player_name: The first and last name of the NFL player (e.g., 'Christian McCaffrey').
@@ -31,28 +31,28 @@ def get_player_stats(player_name: str, year: int = 2023) -> str:
     
     try:
         # Import the requested season
-        df = nfl.import_weekly_data([year])
+        df = nfl.load_player_stats([year])
         
-        # Filter down to the specific player
-        player_df = df[df['player_display_name'].str.lower() == player_name.lower()]
+        # Filter down to the specific player using Polars syntax
+        player_df = df.filter(df['player_display_name'].str.to_lowercase() == player_name.lower())
         
-        if player_df.empty:
-            return f"Error: Could not find any {year} stats for {player_name} in nfl_data_py."
+        if player_df.height == 0:
+            return f"Error: Could not find any {year} stats for {player_name} in nflreadpy."
         
         # Aggregate their season stats
-        stats = player_df[['passing_yards', 'passing_tds', 'rushing_yards', 'rushing_tds', 'receptions', 'receiving_yards', 'receiving_tds']].sum()
+        stats = player_df.select(['passing_yards', 'passing_tds', 'rushing_yards', 'rushing_tds', 'receptions', 'receiving_yards', 'receiving_tds']).sum()
         
         # Format as a nice dictionary for the LLM to read
         result = {
             "player": player_name,
             "season": year,
-            "stats": stats.to_dict()
+            "stats": stats.to_dicts()[0]
         }
         
         return json.dumps(result)
         
     except Exception as e:
-        return f"Error retrieving data for {player_name} in the year {year} using nfl_data_py: {e}"
+        return f"Error retrieving data for {player_name} in the year {year} using nflreadpy: {e}"
 
 # ======================================================================
 
@@ -78,7 +78,7 @@ root_agent = Agent(
 Your goal is to provide data-driven insights on player performance and draft strategy.
 Be concise, professional, and use scouting terminology. Examples such as: ('ADP', 'Target Share', 'Red Zone Efficiency').
 
-CRITICAL: If a user asks about a player's stats or performance, you MUST use the `get_player_stats` tool to find their statistics before answering. Do not guess or hallucinate stats.
+CRITICAL: If a user asks about a player's stats or performance, you MUST use the `get_player_stats` tool to find their statistics before answering. Do not guess or hallucinate stats. If this doesn't work, just say that the data is UNAVAILABLE.
 """,
 )
 
