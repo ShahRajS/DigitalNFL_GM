@@ -13,8 +13,8 @@ Each week will correspond to a new feature and a specific Pull Request (PR) in t
 * **Week 1: Into the Mind of YourGM** – Setting up the `LlmAgent` and basic reasoning.
 * **Week 2: Giving Your GM "Hands"** – Integrating `FunctionTools` with NFL APIs.
 * **Week 3: Building Your Coaching Staff** – Multi-agent orchestration and delegation.
-* **Week 4: Draft Room Memory** – implementing `SessionState` for long-term context.
-* **Week 5: The Weekly Preview** – Using `SequentialAgent` for deterministic pipelines.
+* **Week 4: The Weekly Preview** – Using `SequentialAgent` for deterministic pipelines.
+* **Week 5: Draft Room Memory** – implementing `SessionState` for long-term context.
 * **Week 6: Deep Scouting** – Connecting to local data via **Model Context Protocol (MCP)**.
 * **Week 7: The Fact Checker** – Adding "Reflect & Retry" guardrails for data accuracy.
 * **Week 8: Game Day Launch** – Deploying to Google Cloud/Vertex AI Agent Engine.
@@ -38,9 +38,9 @@ pip install -r requirements.txt
 
 3. **Configure Environment Variables:**
 Create a `.env` file in the root directory. See the **Environment Variables Guide** below for required keys.
-4. **Run the Week 1 Demo:**
+4. **Run the Week 5 Pipeline:**
 ```bash
-python week-01-foundations/main.py
+python week-05/main.py
 ```
 
 
