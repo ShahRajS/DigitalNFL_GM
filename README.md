@@ -51,11 +51,13 @@ python week-05/main.py
 This file will be updated weekly. Copy the template below into your root project directory and add your keys.
 
 ```bash
-# === WEEK 1: Foundations ===
 # Your Google Cloud Project ID where Vertex AI is enabled
 GOOGLE_CLOUD_PROJECT="your-project-id"
+GOOGLE_API_KEY="your-api-key"
 # The region for your Vertex AI resources (e.g., us-central1)
-GOOGLE_CLOUD_LOCATION="us-central1"
+GOOGLE_CLOUD_LOCATION="us-west2"
+BRAVE_API_KEY="your-brave-search-api-key"
+DATABASE_URL="your-database-url"
 ```
 
 ---
