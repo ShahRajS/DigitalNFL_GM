@@ -3,3 +3,4 @@ python-dotenv
 google-genai
 nflreadpy
 polars
+mcp-client

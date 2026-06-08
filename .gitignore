@@ -16,3 +16,8 @@ __pycache__/
 venv/
 env/
 .venv/
+
+# Secret/Custom Scripts Setup
+create_readonly.py
+seed_real_db.py
+test_mcp.py
