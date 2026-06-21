@@ -92,10 +92,16 @@ def chunk_text(pages: list[dict], source_name: str, chunk_size: int = 1000, chun
             # Avoid cutting words in the middle by shifting back to the nearest space
             # if we are not at the end of the text
             if end < text_length:
-                last_space = chunk_content.rfind(" ")
-                if last_space > (chunk_size // 2):  # only back off if we don't truncate too much
-                    end = start + last_space
+                # Try to back off to a newline first to preserve paragraphs/tables
+                last_newline = chunk_content.rfind("\n")
+                if last_newline > (chunk_size // 2):
+                    end = start + last_newline
                     chunk_content = text[start:end]
+                else:
+                    last_space = chunk_content.rfind(" ")
+                    if last_space > (chunk_size // 2):  # only back off if we don't truncate too much
+                        end = start + last_space
+                        chunk_content = text[start:end]
             
             chunks.append({
                 "text": chunk_content.strip(),
@@ -245,7 +251,6 @@ def index_draft_packet(pdf_path: str, index_name: str = "digital-nfl-gm"):
     pages = extract_text_from_pdf(pdf_path)
     source_name = os.path.basename(pdf_path)
     chunks = chunk_text(pages, source_name)
-    
     # Check what is already indexed in Pinecone to support resumption
     print(f"Checking index status in Pinecone for source '{source_name}'...")
     try:
@@ -255,7 +260,13 @@ def index_draft_packet(pdf_path: str, index_name: str = "digital-nfl-gm"):
             top_k=10000,
             include_metadata=True
         )
-        already_indexed_texts = {m.metadata.get("text", "").strip() for m in response.matches if m.metadata}
+        already_indexed_texts = set()
+        for m in response.matches:
+            meta = m.get("metadata") if isinstance(m, dict) else getattr(m, "metadata", None)
+            if meta:
+                text = meta.get("text", "")
+                if text:
+                    already_indexed_texts.add(text.strip())
         print(f"Found {len(already_indexed_texts)} chunks already indexed in Pinecone for this document.")
     except Exception as e:
         print(f"Warning/Error fetching existing vectors from Pinecone: {e}. Starting indexing from scratch.")
@@ -307,11 +318,23 @@ def index_draft_packet(pdf_path: str, index_name: str = "digital-nfl-gm"):
     print(f"Successfully processed all chunks for '{source_name}' in Pinecone index '{index_name}'.")
 
 if __name__ == "__main__":
-    # If run directly, index the local PDF
+    # If run directly, index all local target PDFs
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    pdf_file = os.path.join(script_dir, "2025-San-Francisco-49ers-Draft-Packet.pdf")
+    target_files = [
+        "2025-San-Francisco-49ers-Draft-Packet.pdf",
+        "2026-San-Francisco-49ers-Draft-Packet.pdf",
+        "San-Francisco-49ers-2025-Season-Review.pdf"
+    ]
     
-    if os.path.exists(pdf_file):
-        index_draft_packet(pdf_file)
-    else:
-        print(f"Could not locate PDF at {pdf_file}. Make sure it is copied to week-08.")
+    indexed_any = False
+    for filename in target_files:
+        pdf_path = os.path.join(script_dir, filename)
+        if os.path.exists(pdf_path):
+            print(f"\n--- Indexing {filename} ---")
+            index_draft_packet(pdf_path)
+            indexed_any = True
+        else:
+            print(f"Could not locate PDF at {pdf_path}. Skipping.")
+            
+    if not indexed_any:
+        print("Error: No target PDFs found in week-08 directory to index.")
