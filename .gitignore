@@ -21,3 +21,5 @@ env/
 create_readonly.py
 seed_real_db.py
 test_mcp.py
+week-08/draft_packet_embeddings.json
+

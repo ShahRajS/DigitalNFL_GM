@@ -35,7 +35,6 @@ from mcp.client.session import ClientSession
 
 _mcp_session = None
 _mcp_loop = None
-_mcp_connected = threading.Event()
 
 def start_mcp_background():
     global _mcp_session, _mcp_loop
@@ -56,7 +55,6 @@ def start_mcp_background():
                 async with ClientSession(read_stream, write_stream) as session:
                     await session.initialize()
                     _mcp_session = session
-                    _mcp_connected.set()
                     while True:
                         await asyncio.sleep(1)
         except Exception as e:
@@ -74,7 +72,6 @@ def start_mcp_background():
 # ======================================================================
 _mcp_brave_session = None
 _mcp_brave_loop = None
-_mcp_brave_connected = threading.Event()
 
 def start_mcp_brave_background():
     global _mcp_brave_session, _mcp_brave_loop
@@ -96,7 +93,6 @@ def start_mcp_brave_background():
                 async with ClientSession(read_stream, write_stream) as session:
                     await session.initialize()
                     _mcp_brave_session = session
-                    _mcp_brave_connected.set()
                     while True:
                         await asyncio.sleep(1)
         except Exception as e:
@@ -120,9 +116,8 @@ def execute_db_query(query: str) -> str:
     Returns:
         The results of the query or an error string.
     """
-    if not _mcp_connected.is_set():
-        if not _mcp_connected.wait(timeout=3.0):
-            return "Error: MCP Database session is not connected yet. Please try again in a few seconds."
+    if not _mcp_session:
+        return "Error: MCP session is not connected yet. Tell the user to wait a moment."
     
     future = asyncio.run_coroutine_threadsafe(
         _mcp_session.call_tool("query", arguments={"sql": query}), 
@@ -149,9 +144,8 @@ def execute_web_search(query: str) -> str:
     Returns:
         The text results of the web search.
     """
-    if not _mcp_brave_connected.is_set():
-        if not _mcp_brave_connected.wait(timeout=3.0):
-            return "Error: Brave MCP session is not connected. Missing API key or connection delayed."
+    if not _mcp_brave_session:
+        return "Error: Brave MCP session is not connected. Missing API key?"
     
     future = asyncio.run_coroutine_threadsafe(
         _mcp_brave_session.call_tool("brave_web_search", arguments={"query": query}), 
@@ -230,17 +224,16 @@ def view_draft_board(tool_context: ToolContext) -> str:
 # ======================================================================
 # WEEK 8 NEW FEATURE: RAG UTILITY TOOLS
 # ======================================================================
-def query_draft_packet(query: str, source_filter: str = None) -> str:
+def query_draft_packet(query: str) -> str:
     """Queries the vector database for 2025/2026 San Francisco 49ers Draft Packets, prospect profiles, scouting notes, or season reviews.
     
     Args:
         query: The specific search question or keywords (e.g. '2026 draft top prospects' or 'draft trade rules').
-        source_filter: Optional source PDF filename to filter the search (e.g., '2025-San-Francisco-49ers-Draft-Packet.pdf', '2026-San-Francisco-49ers-Draft-Packet.pdf', or 'San-Francisco-49ers-2025-Season-Review.pdf').
     Returns:
         The matching text excerpts and confidence scores from the database.
     """
     try:
-        results = retrieve_chunks(query, top_k=3, source_filter=source_filter)
+        results = retrieve_chunks(query, top_k=3)
         if not results:
             return "No matching records found in the database."
             
@@ -304,7 +297,6 @@ Guidelines for querying the vector database:
 2. Do NOT use `execute_web_search` for queries regarding draft prospects, rankings, dates, or rules if they can be answered by querying the draft packet database. Always search the vector database first!
 3. Cite the source document, page number, and confidence score of the excerpts you retrieve in your final answer.
 4. If the user shares new facts, scout insights, or updates about players (e.g. Pro Day results) that you should remember for future retrieval, you MUST use the `add_note_to_draft_database` tool to save them.
-5. If the user specifies which document they want (e.g. 2025 Draft Packet, 2026 Draft Packet, or 2025 Season Review), you MUST set the `source_filter` parameter of the `query_draft_packet` tool to the corresponding filename: '2025-San-Francisco-49ers-Draft-Packet.pdf', '2026-San-Francisco-49ers-Draft-Packet.pdf', or 'San-Francisco-49ers-2025-Season-Review.pdf'. Otherwise, leave it as null.
 
 Other guidelines:
 - Use the `execute_web_search` tool ONLY when you need real-time, current-day breaking news (e.g., today's injuries, trade rumors, signings) or information explicitly NOT covered by the team's draft packets or season reviews.
