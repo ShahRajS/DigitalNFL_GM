@@ -5,3 +5,4 @@ nflreadpy
 polars
 mcp-client
 pinecone
+PyPDF2
