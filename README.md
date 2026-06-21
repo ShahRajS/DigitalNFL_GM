@@ -17,36 +17,9 @@ Each week corresponds to a new agentic feature. Below is the current progress of
 * **Week 5: Draft Room Memory** – Implementing `SessionState` for long-term context.
 * **Week 6: Deep Scouting** – Connecting to local data via **Model Context Protocol (MCP)**.
 * **Week 7: The Fact Checker** – Adding "Reflect & Retry" guardrails for data accuracy.
-* **Week 8: Scalable RAG & Cloud Databases (Pinecone)** – Transitioning from local context to a production-grade cloud Vector DB (Pinecone) with automated PDF ingestion, rate-limiting handlers for Gemini embeddings, PostgreSQL MCP integration (Supabase), and Brave Search.
+* **Week 8: Scalable RAG & Cloud Databases (Pinecone)** – Transitioning from local context to a production-grade cloud Vector DB (Pinecone)
 
 ---
-
-## 📁 Week 7 Core Components
-
-The implementation is located in the [week-07/](file:///Users/rajshah/Desktop/DigitalNFL_GM/week-07) directory. Here are the key files and their purposes:
-
-1. **[week-07/main.py](file:///Users/rajshah/Desktop/DigitalNFL_GM/week-07/main.py)**: The main execution script. It reads the local PDF [2025-San-Francisco-49ers-Draft-Packet.pdf](file:///Users/rajshah/Desktop/DigitalNFL_GM/week-07/2025-San-Francisco-49ers-Draft-Packet.pdf) using `PyPDF2` on startup, parses the text content, and injects it directly into the agent's system prompt context. It also launches the background MCP Postgres and MCP Brave Search servers to handle structured SQL databases and live web search.
-
----
-
-## 📁 Week 8 Core Components
-
-The active implementation is located in the [week-08/](file:///Users/rajshah/Desktop/DigitalNFL_GM/week-08) directory. Here are the key files and their purposes:
-
-1. **[week-08/main.py](file:///Users/rajshah/Desktop/DigitalNFL_GM/week-08/main.py)**: The entry point that sets up the `Draft_Scout` ADK agent. It orchestrates:
-   - A PostgreSQL tool (`execute_db_query`) that communicates with Supabase using the Postgres MCP Server.
-   - A live web search tool (`execute_web_search`) using the Brave Search MCP Server.
-   - Vector search tools (`query_draft_packet` and `add_note_to_draft_database`) to interact with Pinecone.
-   - Session state tools (`add_player_to_draft_board`, `remove_player_from_draft_board`, `view_draft_board`) to track draft selections interactively.
-2. **[week-08/rag_indexer.py](file:///Users/rajshah/Desktop/DigitalNFL_GM/week-08/rag_indexer.py)**: The pipeline for document parsing and indexing. It features:
-   - Page-by-page extraction from PDFs using `PyPDF2` with special character sanitization to avoid ADK parsing issues.
-   - A custom sliding-window text chunker (e.g. 1000 characters with 200 character overlap).
-   - Embedding generation using `models/gemini-embedding-2` with a robust exponential backoff handler for 429 rate limit errors.
-   - A smart resumption mechanism that checks existing vectors in Pinecone to avoid re-embedding chunks that have already been indexed.
-3. **[week-08/rag_utils.py](file:///Users/rajshah/Desktop/DigitalNFL_GM/week-08/rag_utils.py)**: Low-level vector utilities that interface with Pinecone for searching and upserting data. On system startup, it automatically checks the health/status of the `digital-nfl-gm` Pinecone index and seeds it if it is missing or empty.
-
----
-
 ## 🛠️ Setup & Installation
 
 Follow these steps to set up and run the Week 8 Agentic Scouting system:
