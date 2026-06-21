@@ -21,6 +21,14 @@ Each week corresponds to a new agentic feature. Below is the current progress of
 
 ---
 
+## 📁 Week 7 Core Components
+
+The implementation is located in the [week-07/](file:///Users/rajshah/Desktop/DigitalNFL_GM/week-07) directory. Here are the key files and their purposes:
+
+1. **[week-07/main.py](file:///Users/rajshah/Desktop/DigitalNFL_GM/week-07/main.py)**: The main execution script. It reads the local PDF [2025-San-Francisco-49ers-Draft-Packet.pdf](file:///Users/rajshah/Desktop/DigitalNFL_GM/week-07/2025-San-Francisco-49ers-Draft-Packet.pdf) using `PyPDF2` on startup, parses the text content, and injects it directly into the agent's system prompt context. It also launches the background MCP Postgres and MCP Brave Search servers to handle structured SQL databases and live web search.
+
+---
+
 ## 📁 Week 8 Core Components
 
 The active implementation is located in the [week-08/](file:///Users/rajshah/Desktop/DigitalNFL_GM/week-08) directory. Here are the key files and their purposes:
@@ -59,10 +67,13 @@ pip install -r requirements.txt
 ```
 
 ### 4. Provide Source Data
-To query the team's local draft packet files, ensure the following PDF files are located in the [week-08/](file:///Users/rajshah/Desktop/DigitalNFL_GM/week-08) directory:
-- `2025-San-Francisco-49ers-Draft-Packet.pdf`
-- `2026-San-Francisco-49ers-Draft-Packet.pdf`
-- `San-Francisco-49ers-2025-Season-Review.pdf`
+To query the team's local draft packet files, ensure the following PDF files are located in their respective directories:
+* **For Week 7**:
+  - `week-07/2025-San-Francisco-49ers-Draft-Packet.pdf`
+* **For Week 8**:
+  - `week-08/2025-San-Francisco-49ers-Draft-Packet.pdf`
+  - `week-08/2026-San-Francisco-49ers-Draft-Packet.pdf`
+  - `week-08/San-Francisco-49ers-2025-Season-Review.pdf`
 
 ---
 
@@ -89,9 +100,16 @@ BRAVE_API_KEY="your-brave-search-api-key"
 
 ## 🚀 Running the System
 
-Start the interactive console loop:
+Start the interactive console loop for the desired week:
+
+**To run Week 8 (Pinecone Cloud RAG & Databases):**
 ```bash
 python week-08/main.py
+```
+
+**To run Week 7 (Injected Prompt PDF Context):**
+```bash
+python week-07/main.py
 ```
 
 ### What happens behind the scenes?
